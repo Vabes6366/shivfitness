@@ -1,43 +1,19 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+import logging
+import azure.functions as func
+from flask import Flask, request
 
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        // Add any necessary services here
-    }
+app = Flask(__name__)
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-        if (env.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
+@app.route('/')
+def hello_world():
+    return '<h1>Hello, World!</h1>'
 
-        app.UseRouting();
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapGet("/", async context =>
-            {
-                await context.Response.WriteAsync("<h1>Hello, World!</h1>");
-            });
-        });
-    }
+    with app.request_context(req.environ):
+        return func.HttpResponse(app.dispatch_request())
 
-    public static void Main(string[] args)
-    {
-        CreateHostBuilder(args).Build().Run();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
-}
+if __name__ == "__main__":
+    # This part is for local testing with Flask's development server
+    app.run(debug=True)
